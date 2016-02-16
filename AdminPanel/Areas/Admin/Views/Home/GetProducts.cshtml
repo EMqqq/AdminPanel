@@ -1,0 +1,74 @@
+﻿@using AdminPanel.Entities
+@model IEnumerable<Product>
+
+
+@if (ViewBag.Message != null)
+{
+    <div class="text-center text-success" style="padding-bottom: 10px">
+        <b><i>@ViewBag.Message</i></b>
+    </div>
+}
+<table class="table-bordered table-hover aTbl">
+    <tr style="background-color: #F8F8F8">
+        <th>
+            Symbol
+        </th>
+        <th>
+            Color
+        </th>
+        <th>
+            Category
+        </th>
+        <th>
+            Sizes
+        </th>
+        <th>
+            Price
+        </th>
+        <th>
+            Edit
+        </th>
+        <th>
+            Delete
+        </th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(i => item.ProductName)<br />
+                @Html.LabelFor(i => item.EditDate) @Html.DisplayFor(i => item.EditDate)<br />
+                @Html.LabelFor(i => item.CreateDate) @Html.DisplayFor(i => item.CreateDate)<br />
+            </td>
+            <td>
+                @Html.DisplayFor(i => item.Color.ColorName)
+            </td>
+            <td>
+                @Html.DisplayFor(i => item.Category.CategoryName)
+            </td>
+            <td>
+                @{
+                    foreach (var size in item.Sizes)
+                    {
+                        @size.SizeId <br />
+                    }
+                }
+            </td>
+            <td>
+                <span style="font-weight: 600">@Html.LabelFor(i => item.NormalPrice) </span><br />@Html.DisplayFor(i => item.NormalPrice) zł <br />
+                <span style="font-weight: 600">@Html.LabelFor(i => item.Discount) </span><br />@Html.DisplayFor(i => item.Discount) %<br />
+                <span style="font-weight: 600">@Html.LabelFor(i => item.Price) </span><br />@Html.DisplayFor(i => item.Price) zł<br />
+            </td>
+            <td>
+                @Html.ActionLink("EDIT", "Edit", new { id = item.ProductId }, new { @class = "btn-sm btn-info" })
+            </td>
+            <td>
+                @using (Html.BeginForm("DELETE", "Home"))
+                {
+                    @Html.Hidden("ProductID", item.ProductId)
+                    <input type="submit" value="DELETE" class="btn-xs btn-danger" onclick="return confirm('Are you sure that you want to delete this product ?');" />
+                }
+            </td>
+        </tr>
+                    }
+</table>

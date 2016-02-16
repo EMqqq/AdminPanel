@@ -1,0 +1,40 @@
+﻿@using AdminPanel.Entities
+@model Category
+
+@{
+    ViewBag.Title = "Edit Category: " + Model.CategoryName;
+}
+
+@using (Html.BeginForm("EditCategory", "Category", FormMethod.Post))
+{
+    <div class="form-horizontal">
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+
+        <div class="well">
+            <fieldset>
+                <legend>Edit Category</legend>
+
+                @Html.HiddenFor(m => m.CategoryId)
+
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-2">
+                        @Html.ValidationMessageFor(model => model.CategoryName, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.CategoryName, new { @class = "requiredA control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.TextBoxFor(model => model.CategoryName, new { @class = "form-control", @style = "text-align:center" })
+                    </div>
+                </div>
+                <div class="col-md-offset-5 col-md-3">
+                    <input type="submit" value="CONFIRM" class="btn btn-success btn-sm" />
+                    @Html.ActionLink("CANCEL", "Index", "Category", null, new { @class = "btn btn-danger btn-sm" })
+                </div>
+            </fieldset>
+        </div>
+    </div>
+}
+
+@section scripts{
+    @Scripts.Render("~/bundles/jqueryval")
+}

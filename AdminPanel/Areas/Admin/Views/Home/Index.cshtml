@@ -1,0 +1,66 @@
+﻿@{
+    ViewBag.Title = "Administration";
+}
+
+@section scripts{
+    @Scripts.Render("~/bundles/jquery")
+}
+<script type="text/javascript">
+    $(function () {
+        $('.productsOptions').hide();
+        $('.colorsOptions').hide();
+
+        $('.categoryOption').click(function (e) {
+            e.stopPropagation();
+            $(this).closest('ul').siblings().find('.productsOptions').hide();
+            check(this);
+            $(this).find('.productsOptions').toggle();
+        });
+
+        $('.productOption').click(function (e) {
+            e.stopPropagation();
+            var category = $(this).closest($('.categoryOption')).find('.categoryName').text()
+            displayProducts(category, $(this).find('.productName').text());
+            $(this).children('.colorsOptions').toggle();
+        });
+
+        $('.colorsOptions').click(function (e) {
+            e.stopPropagation();
+        });
+
+        var displayProducts = function (e, f) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetProducts", "Home")',
+                data:
+                    {
+                        category: e,
+                        productName: f
+                    }
+            }).done(function (result) {
+                $('#productsList').html(result);
+            }).fail(function (result) {
+                alert("Error, contact with administrator.");
+            });
+        }
+
+        var check = function (e) {
+            if ($(".productsOptions:visible").length === 0) {
+                displayProducts($(e).find($('.categoryName')).text());
+            }
+            else {
+                displayProducts();
+            }
+        }
+    })
+</script>
+
+<aside class="col-md-4 text-center">
+    @Html.ActionLink("ADD NEW", "Create", null, new { @class = "btn btn-black" })
+
+    @{Html.RenderAction("Menu");}
+</aside>
+
+<div id="productsList" class="col-md-8">
+    @{ Html.RenderAction("GetProducts");}
+</div>

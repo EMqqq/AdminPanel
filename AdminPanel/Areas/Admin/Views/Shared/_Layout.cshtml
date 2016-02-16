@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - AdminPanel</title>
+    @Scripts.Render("~/bundles/modernizr")
+    @Styles.Render("~/Content")
+    @RenderSection("Scripts", required: false)
+</head>
+<body>
+    <div id="custom-bootstrap-menu" class="navbar navbar-default navbar-static-top" role="navigation">
+        <div class="container">
+            <div class="navbar-inner">
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-md-4 text-center nav logo">
+                            @Html.ActionLink("ADMIN PANEL", "Index", "Home", new { Area = "" }, new { })
+                        </div>
+                        <div class="navbar-collapse">
+                            <ul class="row nav nav-pills uppercase">
+                                <li>@Html.ActionLink("Products", "Index", "Home", null, new { @class = "btn btn-default" })</li>
+                                <li>@Html.ActionLink("Categories", "Index", "Category", null, new { @class = "btn btn-default" })</li>
+                                <li>@Html.ActionLink("Colors", "Index", "Color", null, new { @class = "btn btn-default" })</li>
+                                <li>@Html.ActionLink("Sizes", "Index", "Size", null, new { @class = "btn btn-default" })</li>
+                                <li class="visible-xs">@Html.ActionLink("Suppliers", "Index", "Suppliers", null, new { @class = "btn btn-default" })</li>
+                                <li class="visible-xs">@Html.ActionLink("Delivery Method", "Index", "DeliveryMethod", null, new { @class = "btn btn-default" })</li>
+                                <li class="hidden-xs">
+                                    <div class="dropdown drop">
+                                        <a class="btn btn-default dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown"
+                                           aria-haspopup="true" aria-expanded="true">
+                                            Supply
+                                            <span class="caret"></span>
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                                            <li>
+                                                @Html.ActionLink("Suppliers", "Index", "Suppliers")
+                                            </li>
+                                            <li>
+                                                @Html.ActionLink("Delivery Method", "Index", "DeliveryMethod")
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="content" class="container body-content">
+        @RenderBody()
+    </div>
+    <div class="push"></div>
+
+    <footer>
+        <div class="foot">
+            <small class="copy pull-left">AdminPanel</small><small class="by pull-right">Created by Emil Kołodziej</small>
+        </div>
+    </footer>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+</body>
+</html>

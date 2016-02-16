@@ -1,0 +1,40 @@
+﻿@using AdminPanel.Entities
+@model DeliveryMethod
+
+@{
+    ViewBag.Title = "Edit Delivery Method: " + Model.Name;
+}
+
+@using (Html.BeginForm("EditDeliveryMethod", "DeliveryMethod", FormMethod.Post))
+{
+    <div class="form-horizontal">
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+
+        <div class="well">
+            <fieldset>
+                <legend>Edit Delivery Method</legend>
+
+                @Html.HiddenFor(m => m.DeliveryMethodId)
+
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-2">
+                        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.Name, new { @class = "requiredA control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.TextBoxFor(model => model.Name, new { @class = "form-control", @style = "text-align:center" })
+                    </div>
+                </div>
+                <div class="col-md-offset-5 col-md-3">
+                    <input type="submit" value="CONFIRM" class="btn btn-success btn-sm" />
+                    @Html.ActionLink("CANCEL", "Index", "DeliveryMethod", null, new { @class = "btn btn-danger btn-sm" })
+                </div>
+            </fieldset>
+        </div>
+    </div>
+}
+
+@section scripts{
+    @Scripts.Render("~/bundles/jqueryval")
+}

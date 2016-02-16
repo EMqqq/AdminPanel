@@ -1,0 +1,13 @@
+﻿@using AdminPanel.Entities
+@model List<Product>
+
+
+@foreach (var product in Model)
+{
+    <li class="productOption">
+        <span class="productName">@product.ProductName</span>
+        <ul class="colorsOptions">
+            @{ Html.RenderAction("SubBMenu", new { category = product.Category.CategoryName, productName = product.ProductName }); }
+        </ul>
+    </li>
+}

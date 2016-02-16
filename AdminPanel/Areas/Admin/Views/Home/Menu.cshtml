@@ -1,0 +1,16 @@
+﻿@using AdminPanel.Entities
+@model IEnumerable<Category>
+
+<div class="text-left menuTree">
+    @foreach (var item in Model)
+    {
+        <ul class="list-group categoryOption">
+            <li class="list-group-item">
+                <span class="categoryName">@item.CategoryName</span>
+                <ul class="productsOptions">
+                    @{ Html.RenderAction("SubAMenu", new { category = item.CategoryName }); }
+                </ul>
+            </li>
+        </ul>
+                        }
+</div>

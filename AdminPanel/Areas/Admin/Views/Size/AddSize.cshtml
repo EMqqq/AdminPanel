@@ -1,0 +1,36 @@
+﻿@using AdminPanel.Entities
+@model Size
+
+@{
+    ViewBag.Title = "Add Size";
+}
+
+<h2>Add Size</h2>
+
+@using (Html.BeginForm("AddSize", "Size", FormMethod.Post))
+{
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <div class="well">
+            <fieldset>
+                <legend>Add Size</legend>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-2">
+                        @Html.ValidationMessageFor(model => model.SizeId, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.SizeId, new { @class = "requiredA control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.SizeId)
+                    </div>
+                </div>
+                <br />
+                <div class="col-md-offset-5 col-md-3">
+                    <input type="submit" value="CONFIRM" class="btn btn-success btn-sm" />
+                    @Html.ActionLink("CANCEL", "Index", "Size", null, new { @class = "btn btn-danger btn-sm" })
+                </div>
+            </fieldset>
+        </div>
+    </div>
+}
