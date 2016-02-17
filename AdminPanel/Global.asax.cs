@@ -31,7 +31,6 @@ namespace AdminPanel
             currentCulture.NumberFormat.CurrencyDecimalSeparator = ".";
 
             Thread.CurrentThread.CurrentCulture = currentCulture;
-            //Thread.CurrentThread.CurrentUICulture = currentCulture;
         }
     }
 }

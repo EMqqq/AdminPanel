@@ -17,12 +17,20 @@ namespace AdminPanel.Areas.Admin.Controllers
     {
         AdminPanelContext db = new AdminPanelContext();
 
+        /// <summary>
+        /// GET: Admin/Suppliers
+        /// </summary>
+        /// <returns> display suppliers from database </returns>
         public ActionResult Index()
         {
             List<Supplier> suppliers = db.Suppliers.Include(d => d.DeliveryMethod).Include(f => f.FilePath).OrderBy(c => c.Name).ToList();
             return View(suppliers);
         }
 
+        /// <summary>
+        /// GET: Admin/Suppliers/AddSupplier
+        /// </summary>
+        /// <returns> supplier's add form </returns>
         [HttpGet]
         public ActionResult AddSupplier()
         {
@@ -35,6 +43,12 @@ namespace AdminPanel.Areas.Admin.Controllers
             return View(supplier);
         }
 
+        /// <summary>
+        /// add new supplier with image to database
+        /// </summary>
+        /// <param name="supplier"> supplier from GET Method </param>
+        /// <param name="upload"> input file </param>
+        /// <returns> add supplier or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddSupplier(Supplier supplier, HttpPostedFileBase upload)
@@ -70,6 +84,11 @@ namespace AdminPanel.Areas.Admin.Controllers
             }
         }
 
+        /// <summary>
+        /// GET: Admin/Suppliers/EditSupplier
+        /// </summary>
+        /// <param name="id"> supplier's id </param>
+        /// <returns> supplier's edit form </returns>
         [HttpGet]
         public ActionResult EditSupplier(int? id)
         {
@@ -101,6 +120,12 @@ namespace AdminPanel.Areas.Admin.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// edit supplier in database
+        /// </summary>
+        /// <param name="model"> view model from GET Method </param>
+        /// <param name="upload"> input file ( if exists delete old supplier's image) </param>
+        /// <returns> save supplier changes or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> EditSupplier(EditSupplierViewModel model, HttpPostedFileBase upload)
@@ -154,6 +179,11 @@ namespace AdminPanel.Areas.Admin.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// delete supplier from database
+        /// </summary>
+        /// <param name="id"> supplier's id </param>
+        /// <returns> GET: Admin/Supplier </returns>
         [HttpPost]
         public async Task<ActionResult> DeleteSupplier(int id)
         {

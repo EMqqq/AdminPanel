@@ -16,11 +16,19 @@ namespace AdminPanel.Areas.Admin.Controllers
         public DeliveryMethodController(IDeliveryMethodRepository repository)
         { this.repository = repository; }
 
+        /// <summary>
+        /// GET: Admin/DeliveryMethod
+        /// </summary>
+        /// <returns> display delivery methods from database </returns>
         public ActionResult Index()
         {
             return View(repository.GetDeliveryMethods().OrderBy(c => c.Name));
         }
 
+        /// <summary>
+        /// GET: Admin/DeliveryMethod/AddDeliveryMethod
+        /// </summary>
+        /// <returns> delivery method's add form </returns>
         [HttpGet]
         public ActionResult AddDeliveryMethod()
         {
@@ -29,6 +37,11 @@ namespace AdminPanel.Areas.Admin.Controllers
             return View(deliveryMethod);
         }
 
+        /// <summary>
+        /// add new delivery method to database
+        /// </summary>
+        /// <param name="deliveryMethod"> delivery method from GET Method </param>
+        /// <returns> add category or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult AddDeliveryMethod([Bind(Include = "DeliveryMethodId, Name")] DeliveryMethod deliveryMethod)
@@ -44,6 +57,11 @@ namespace AdminPanel.Areas.Admin.Controllers
             }
         }
 
+        /// <summary>
+        /// GET: Admin/DeliveryMethod/EditDeliveryMethod
+        /// </summary>
+        /// <param name="id"> delivery method's id </param>
+        /// <returns> delivery method's edit form </returns>
         [HttpGet]
         public ActionResult EditDeliveryMethod(int? id)
         {
@@ -62,6 +80,11 @@ namespace AdminPanel.Areas.Admin.Controllers
             return View(deliveryMethod);
         }
 
+        /// <summary>
+        /// edit delivery method in database
+        /// </summary>
+        /// <param name="deliveryMethod"> delivery method from GET method </param>
+        /// <returns> save changes or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> EditDeliveryMethod([Bind(Include = "DeliveryMethodId, Name")] DeliveryMethod deliveryMethod)
@@ -79,6 +102,11 @@ namespace AdminPanel.Areas.Admin.Controllers
             return View(deliveryMethod);
         }
 
+        /// <summary>
+        /// delete delivery method from database
+        /// </summary>
+        /// <param name="deliveryMethodId"> delivery method's id </param>
+        /// <returns> GET: Admin/DeliveryMethod </returns>
         [HttpPost]
         public ActionResult DeleteDeliveryMethod(int deliveryMethodId)
         {

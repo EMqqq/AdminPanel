@@ -17,12 +17,20 @@ namespace AdminPanel.Areas.Admin.Controllers
     {
         AdminPanelContext db = new AdminPanelContext();
 
+        /// <summary>
+        /// GET: Admin/Color
+        /// </summary>
+        /// <returns> display colors from database </returns>
         public ActionResult Index()
         {
             List<Color> Colors = db.Colors.Include(f => f.FilePath).OrderBy(c => c.ColorName).ToList();
             return View(Colors);
         }
 
+        /// <summary>
+        /// GET: Admin/Color/AddColor
+        /// </summary>
+        /// <returns> color's add form </returns>
         [HttpGet]
         public ActionResult AddColor()
         {
@@ -33,6 +41,12 @@ namespace AdminPanel.Areas.Admin.Controllers
             return View(color);
         }
 
+        /// <summary>
+        /// add new color with image to database
+        /// </summary>
+        /// <param name="color"> color from GET Method </param>
+        /// <param name="upload"> input file </param>
+        /// <returns> add color or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddColor(Color color, HttpPostedFileBase upload)
@@ -65,6 +79,11 @@ namespace AdminPanel.Areas.Admin.Controllers
             }
         }
 
+        /// <summary>
+        /// GET: Admin/Color/EditColor
+        /// </summary>
+        /// <param name="id"> color's id </param>
+        /// <returns> color's edit form </returns>
         [HttpGet]
         public ActionResult EditColor(int? id)
         {
@@ -86,6 +105,12 @@ namespace AdminPanel.Areas.Admin.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// edit color in database
+        /// </summary>
+        /// <param name="model"> view model from GET Method </param>
+        /// <param name="upload"> input file ( if exists delete old color's image) </param>
+        /// <returns> save color changes or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> EditColor(EditColorViewModel model, HttpPostedFileBase upload)
@@ -133,6 +158,11 @@ namespace AdminPanel.Areas.Admin.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// delete color from database
+        /// </summary>
+        /// <param name="colorId"> color's id </param>
+        /// <returns> GET: Admin/Color </returns>
         [HttpPost]
         public async Task<ActionResult> DeleteColor(int colorId)
         {

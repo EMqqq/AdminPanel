@@ -358,7 +358,7 @@ fieldset[disabled] .btn-default.active {
 }
 
 .prodPriceBox::after {
-    content: "[zł]";
+    content: "[$]";
     float: right;
 }
 

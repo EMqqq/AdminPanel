@@ -316,6 +316,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Areas\Admin\Helpers\" />
+    <Folder Include="Areas\Admin\Views\Default\" />
     <Folder Include="Content\Images\Colors\" />
     <Folder Include="Content\Images\Suppliers\" />
   </ItemGroup>

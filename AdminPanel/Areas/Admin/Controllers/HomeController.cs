@@ -20,20 +20,29 @@ namespace AdminPanel.Areas.Admin.Controllers
     {
         AdminPanelContext db = new AdminPanelContext();
 
+        /// <summary>
+        /// GET: Admin/Home
+        /// </summary>
+        /// <returns> display products from database </returns>
         public ActionResult Index()
         {
             return View();
         }
 
-        public PartialViewResult Menu(string category, int? productId)
+        /// <summary>
+        /// left side of Index() view
+        /// </summary>
+        /// <returns> display tree menu with categories </returns>
+        public PartialViewResult Menu()
         {
             var categories = db.Categories.ToList();
             return PartialView(categories);
         }
 
         /// <summary>
-        /// Return product's sublist for specified category
+        /// products' sublist for specified category
         /// </summary>
+        /// <param name="category"> category name from Menu() </param>
         public PartialViewResult subAMenu(string category)
         {
             var products = db.Products.Where(c => c.Category.CategoryName == category).
@@ -42,9 +51,9 @@ namespace AdminPanel.Areas.Admin.Controllers
         }
 
         /// <summary>
-        /// Return colors' (string) sublist for specified name product
+        /// colors' (string) sublist for specified product name
         /// </summary>
-        /// <param name="productName"> name from subAMenu </param>
+        /// <param name="productName"> product name from subAMenu() </param>
         public PartialViewResult subBMenu(string productName, string category)
         {
             IEnumerable<string> colors = db.Products.Where(c => c.Category.CategoryName == category).
@@ -53,6 +62,12 @@ namespace AdminPanel.Areas.Admin.Controllers
             return PartialView(colors);
         }
 
+        /// <summary>
+        /// right side of Index() view
+        /// </summary>
+        /// <param name="category"> category name from Menu() </param>
+        /// <param name="productName"> product name from subAMenu() </param>
+        /// <returns> display table with products </returns>
         public PartialViewResult GetProducts(string category, string productName)
         {
             IQueryable<Product> products = db.Products.Include(c => c.Color).Include(c => c.Category).
@@ -74,6 +89,10 @@ namespace AdminPanel.Areas.Admin.Controllers
             return PartialView(products);
         }
 
+        /// <summary>
+        /// GET: Admin/Home/Create
+        /// </summary>
+        /// <returns> products's add form </returns>
         [HttpGet]
         public ActionResult Create()
         {
@@ -90,6 +109,13 @@ namespace AdminPanel.Areas.Admin.Controllers
             return View(newproduct);
         }
 
+        /// <summary>
+        /// add new product to database
+        /// </summary>
+        /// <param name="newproduct"> product from GET method </param>
+        /// <param name="uploads"> input files </param>
+        /// <param name="selectedSizes"> product's sizes </param>
+        /// <returns> add product or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(Product newproduct, IEnumerable<HttpPostedFileBase> uploads, string[] selectedSizes)
@@ -147,6 +173,11 @@ namespace AdminPanel.Areas.Admin.Controllers
             return View(newproduct);
         }
 
+        /// <summary>
+        /// GET: Admin/Home/Edit
+        /// </summary>
+        /// <param name="id"> product's id </param>
+        /// <returns> product's edit form </returns>
         [HttpGet]
         public ActionResult Edit(int? id)
         {
@@ -179,6 +210,13 @@ namespace AdminPanel.Areas.Admin.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// edit product in database
+        /// </summary>
+        /// <param name="model"> view model from GET Method </param>
+        /// <param name="uploads"> input files ( if exists delete old product's images) </param>
+        /// <param name="selectedSizes"> product's sizes </param>
+        /// <returns> save product changes or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(EditProductViewModel model, IEnumerable<HttpPostedFileBase> uploads, string[] selectedSizes)
@@ -261,6 +299,11 @@ namespace AdminPanel.Areas.Admin.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// delete product from database
+        /// </summary>
+        /// <param name="productID"> product's id </param>
+        /// <returns> GET: Admin/Home </returns>
         [HttpPost]
         public async Task<ActionResult> Delete(int productID)
         {
