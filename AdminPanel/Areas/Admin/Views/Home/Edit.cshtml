@@ -7,21 +7,28 @@
 
 <script type="text/javascript">
     $(function () {
+
+        // get typed price
         var checkProduct = function () {
             var productPrice = parseFloat(($('.price').val())).toFixed(2);
 
+            // set product price as 0 if not typed
             if (productPrice == '') {
                 productPrice = 0.00;
             }
+
             return productPrice;
         }
 
+        // get typed discount
         var checkDiscount = function () {
             var discountPrice = parseFloat(($('.discount').val())).toFixed(2);
 
+            // set product discount as 0 if not typed
             if (discountPrice == '') {
                 discountPrice = 0.00;
             }
+
             return discountPrice;
         }
 
@@ -34,29 +41,42 @@
             }
         }
 
+        // calculate product price
         var countPrice = function () {
             $.ajax({
                 type: "GET",
                 url: '@Url.Action("calcPrice", "Home")',
+                dataType: "json",
                 data: {
                     "fullPrice": checkProduct(),
                     "discount": checkDiscount()
-                },
-                dataType: "json"
+                }
             }).done(function (result) {
+
+                // display calculated price
                 $('.prodPrice').html(result.toFixed(2));
+
+                // disable submit button if calculated price is 0
                 checkTotal(result);
             }).fail(function (result) {
+
+                // display error alert if something is wrong
                 alert("Error, contact with administrator.");
             });
         }
-        window.onload = countPrice;
-        $('.price').change(countPrice);
-        $('.discount').change(countPrice);
+        
+        window.onload = countPrice();
+        $('.price').change(countPrice());
+        $('.discount').change(countPrice());
     })
 
+    // files input preview
     window.preview = function (input) {
         if (input.files && input.files[0]) {
+
+            // delete old previews if added new images
+            $("#previewImg").html("");
+
             $(input.files).each(function () {
                 var reader = new FileReader();
                 reader.readAsDataURL(this);
@@ -120,7 +140,7 @@
                 <div class="form-group col-xs-12">
                     @Html.Label("After discount:", new { @class = "col-md-offset-1 control-label col-md-2" })
                     <div class="col-md-3 ">
-                        <span class="prodPriceBox prodPrice text-center">Obliczam..</span>
+                        <span class="prodPriceBox prodPrice text-center">Counting...</span>
                     </div>
                 </div>
 

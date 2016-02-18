@@ -1,33 +1,48 @@
 ﻿@{
     ViewBag.Title = "Administration";
 }
-
-@section scripts{
-    @Scripts.Render("~/bundles/jquery")
-}
 <script type="text/javascript">
     $(function () {
-        $('.productsOptions').hide();
-        $('.colorsOptions').hide();
 
+        var check = function (e) {
+
+            // display products sublist with category = .categoryName.text()
+            if ($(".productsOptions:visible").length === 0) {
+                displayProducts($(e).find($('.categoryName')).text());
+            }
+            // display all products if sublist visible
+            else {
+                displayProducts();
+            }
+        }
+
+        // display products for clicked category
+        // show sublist and hide other categories sublists
         $('.categoryOption').click(function (e) {
             e.stopPropagation();
-            $(this).closest('ul').siblings().find('.productsOptions').hide();
             check(this);
             $(this).find('.productsOptions').toggle();
+            $(this).siblings().find('.productsOptions').hide();
         });
 
+        // display colors for clicked product name
+        // show sublist and hide other categories sublists
         $('.productOption').click(function (e) {
             e.stopPropagation();
+            $(this).children('.colorsOptions').toggle();
+
             var category = $(this).closest($('.categoryOption')).find('.categoryName').text()
             displayProducts(category, $(this).find('.productName').text());
-            $(this).children('.colorsOptions').toggle();
         });
 
+        // avoid sublist hiding
         $('.colorsOptions').click(function (e) {
             e.stopPropagation();
         });
 
+        // show products on GetProducts() view
+        // name     - product name
+        // category - products category
         var displayProducts = function (e, f) {
             $.ajax({
                 type: "GET",
@@ -38,19 +53,14 @@
                         productName: f
                     }
             }).done(function (result) {
+
+                // display products
                 $('#productsList').html(result);
             }).fail(function (result) {
+
+                // display error alert if something is wrong
                 alert("Error, contact with administrator.");
             });
-        }
-
-        var check = function (e) {
-            if ($(".productsOptions:visible").length === 0) {
-                displayProducts($(e).find($('.categoryName')).text());
-            }
-            else {
-                displayProducts();
-            }
         }
     })
 </script>
@@ -62,5 +72,15 @@
 </aside>
 
 <div id="productsList" class="col-md-8">
+    @if (ViewBag.Message != null)
+    {
+        <div class="text-center text-success" style="padding-bottom: 10px">
+            <b><i>@ViewBag.Message</i></b>
+        </div>
+    }
     @{ Html.RenderAction("GetProducts");}
 </div>
+
+@section scripts{
+    @Scripts.Render("~/bundles/jquery")
+}

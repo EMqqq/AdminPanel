@@ -339,6 +339,10 @@ fieldset[disabled] .btn-default.active {
     border-radius: 5px;
 }
 
+.productsOptions, .colorsOptions {
+    display: none;
+}
+
 .price {
     text-transform: lowercase;
 }

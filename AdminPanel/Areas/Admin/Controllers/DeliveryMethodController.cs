@@ -51,10 +51,8 @@ namespace AdminPanel.Areas.Admin.Controllers
                 repository.Add(deliveryMethod);
                 return RedirectToAction("Index");
             }
-            else
-            {
-                return View(deliveryMethod);
-            }
+
+            return View(deliveryMethod);
         }
 
         /// <summary>
@@ -99,6 +97,7 @@ namespace AdminPanel.Areas.Admin.Controllers
 
                 return RedirectToAction("Index");
             }
+            
             return View(deliveryMethod);
         }
 

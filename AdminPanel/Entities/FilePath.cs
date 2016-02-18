@@ -20,11 +20,8 @@ namespace AdminPanel.Entities
         [HiddenInput(DisplayValue = false)]
         public int? ProductId { get; set; }
 
-        [HiddenInput(DisplayValue = false)]
-        public int? ColorId { get; set; }
-
         public virtual Product Product { get; set; }
-        public virtual ICollection<Color> Color { get; set; }
+        public virtual ICollection<Color> Colors { get; set; }
         public virtual ICollection<Supplier> Suppliers { get; set; }
     }
 }

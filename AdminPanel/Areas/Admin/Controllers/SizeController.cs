@@ -47,10 +47,8 @@ namespace AdminPanel.Areas.Admin.Controllers
                 repository.Add(size);
                 return RedirectToAction("Index");
             }
-            else
-            {
-                return View(size);
-            }
+
+            return View(size);
         }
 
         /// <summary>
@@ -63,6 +61,7 @@ namespace AdminPanel.Areas.Admin.Controllers
         {
             Size size = repository.GetSizes().FirstOrDefault(i => i.SizeId == sizeId);
             repository.Delete(size);
+
             return RedirectToAction("Index");
         }
     }

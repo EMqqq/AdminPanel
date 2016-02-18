@@ -1,13 +1,6 @@
 ﻿@using AdminPanel.Entities
 @model IEnumerable<Product>
 
-
-@if (ViewBag.Message != null)
-{
-    <div class="text-center text-success" style="padding-bottom: 10px">
-        <b><i>@ViewBag.Message</i></b>
-    </div>
-}
 <table class="table-bordered table-hover aTbl">
     <tr style="background-color: #F8F8F8">
         <th>
@@ -70,5 +63,5 @@
                 }
             </td>
         </tr>
-                    }
+    }
 </table>

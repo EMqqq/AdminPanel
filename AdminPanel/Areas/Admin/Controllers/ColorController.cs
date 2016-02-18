@@ -10,6 +10,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Threading.Tasks;
 using AdminPanel.Areas.Admin.ViewModels;
+using System;
 
 namespace AdminPanel.Areas.Admin.Controllers
 {
@@ -35,9 +36,6 @@ namespace AdminPanel.Areas.Admin.Controllers
         public ActionResult AddColor()
         {
             Color color = new Color();
-
-            color.FilePath = new FilePath();
-
             return View(color);
         }
 
@@ -51,32 +49,37 @@ namespace AdminPanel.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddColor(Color color, HttpPostedFileBase upload)
         {
+            if (upload == null)
+            {
+                ModelState.AddModelError("NoImage", "Upload color's image");
+            }
+
             if (ModelState.IsValid)
             {
-                color.FilePath = new FilePath();
+                Guid number = Guid.NewGuid();
 
-                if (upload != null && upload.ContentLength > 0)
+                // assign upload to color and save on server
+                FilePath colorImage = new FilePath()
                 {
-                    FilePath colorImage = new FilePath()
-                    {
-                        FileType = FileType.colorImage,
-                        FileName = Path.GetFileName(upload.FileName),
-                    };
+                    FileType = FileType.colorImage,
+                    FileName = Path.GetFileName(number + "-" + upload.FileName)
+                };
 
-                    color.FilePath = colorImage;
-                    color.FilePathId = colorImage.FilePathId;
+                color.FilePath = colorImage;
+                color.FilePathId = colorImage.FilePathId;
+                
+                upload.SaveAs(Path.Combine(Server.MapPath("~/Content/Images/Colors"), colorImage.FileName));
 
-                    upload.SaveAs(Path.Combine(Server.MapPath("~/Content/Images/Colors"), colorImage.FileName));
-                }
-
+                // save changes
                 db.Colors.Add(color);
+                colorImage.Colors.Add(color);
                 await db.SaveChangesAsync();
+
                 return RedirectToAction("Index");
             }
-            else
-            {
-                return View(color);
-            }
+
+            // return if invalid
+            return View(color);
         }
 
         /// <summary>
@@ -88,13 +91,18 @@ namespace AdminPanel.Areas.Admin.Controllers
         public ActionResult EditColor(int? id)
         {
             if (id == null)
-            { return new HttpStatusCodeResult(HttpStatusCode.BadRequest); }
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
 
-            Color color = db.Colors.Include(f => f.FilePath).Where(c => c.ColorId == id).FirstOrDefault();
+            Color color = db.Colors.Where(c => c.ColorId == id).FirstOrDefault();
 
             if (color == null)
-            { return HttpNotFound(); }
+            {
+                return HttpNotFound();
+            }
 
+            // assign default view model's values
             EditColorViewModel model = new EditColorViewModel()
             {
                 Id = color.ColorId,
@@ -115,68 +123,83 @@ namespace AdminPanel.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> EditColor(EditColorViewModel model, HttpPostedFileBase upload)
         {
-            Color color = await db.Colors.Include(f => f.FilePath).Where(c => c.ColorId == model.Id).FirstOrDefaultAsync();
+            Color color = await db.Colors.Where(c => c.ColorId == model.Id).FirstOrDefaultAsync();
+            FilePath actualImage = db.FilePaths.Where(c => c.FilePathId == color.FilePathId).FirstOrDefault();
+            
+            // assign name from model
+            color.ColorName = model.Name;
 
-            model.FilePath = color.FilePath;
-
-            FilePath actualImage = color.FilePath;
-
-            string actualImagePath = null;
-
-            if (actualImage != null)
-            {
-                actualImagePath = Request.MapPath("~/Content/Images/Colors/" + actualImage.FileName);
-            }
+            // get a path to image on server
+            string actualImagePath = Request.MapPath("~/Content/Images/Colors/" + actualImage.FileName);
 
             if (ModelState.IsValid)
             {
+                // check if upload exists
+                // if exists delete old from server,
+                // assign new to color and save on server
                 if (upload != null && upload.ContentLength > 0)
                 {
-                    if (actualImagePath != null)
-                    {
-                        System.IO.File.Delete(actualImagePath);
-                    }
-                    color.FilePath = new FilePath();
+                    System.IO.File.Delete(actualImagePath);
+
+                    Guid number = Guid.NewGuid();
 
                     FilePath colorImage = new FilePath
                     {
                         FileType = FileType.colorImage,
-                        FileName = Path.GetFileName(upload.FileName),
+                        FileName = Path.GetFileName(number + "-" + upload.FileName)
                     };
 
                     color.FilePath = colorImage;
                     color.FilePathId = colorImage.FilePathId;
-
+                    
                     upload.SaveAs(Path.Combine(Server.MapPath("~/Content/Images/Colors"), colorImage.FileName));
                 }
 
-                color.ColorName = model.Name;
+                // save changes
                 db.Entry(color).State = EntityState.Modified;
                 await db.SaveChangesAsync();
+
                 return RedirectToAction("Index");
             }
+
+            // return if invalid
             return View(model);
         }
 
         /// <summary>
-        /// delete color from database
+        /// delete color with image from database
         /// </summary>
         /// <param name="colorId"> color's id </param>
         /// <returns> GET: Admin/Color </returns>
         [HttpPost]
         public async Task<ActionResult> DeleteColor(int colorId)
         {
-            Color color = db.Colors.Where(c => c.ColorId == colorId).Single();
+            Color color = await db.Colors.Where(c => c.ColorId == colorId).SingleAsync();
+            FilePath image = await db.FilePaths.Where(c => c.FilePathId == color.FilePathId).SingleAsync();
 
-            FilePath image = color.FilePath;
-
+            // get path to image and delete
             string filePath = Request.MapPath("~/Content/Images/Colors/" + image.FileName);
             System.IO.File.Delete(filePath);
-
             db.FilePaths.Remove(image);
+
+            // delete color
             db.Colors.Remove(color);
+
             await db.SaveChangesAsync();
+
             return RedirectToAction("Index");
+        }
+
+        /// <summary>
+        /// close database connections
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

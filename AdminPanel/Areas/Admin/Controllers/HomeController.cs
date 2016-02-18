@@ -13,6 +13,7 @@ using System.Web.Mvc;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Threading.Tasks;
+using AdminPanel.Areas.Admin.Helpers;
 
 namespace AdminPanel.Areas.Admin.Controllers
 {
@@ -26,6 +27,10 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns> display products from database </returns>
         public ActionResult Index()
         {
+            // confirmation message for edited or created new product
+            ViewBag.Message = (string)TempData["message"];
+            TempData.Remove("message");
+
             return View();
         }
 
@@ -83,9 +88,6 @@ namespace AdminPanel.Areas.Admin.Controllers
                 products = products.Where(p => p.ProductName.ToLower() == productName.ToLower());
             }
 
-            ViewBag.Message = (string)TempData["message"];
-            TempData.Remove("message");
-
             return PartialView(products);
         }
 
@@ -97,14 +99,13 @@ namespace AdminPanel.Areas.Admin.Controllers
         public ActionResult Create()
         {
             Product newproduct = new Product();
-
-            newproduct.Category = new Category();
+            
+            // set every size default as product size in checkboxes
             newproduct.Sizes = new List<Size>();
-            newproduct.FilePaths = new List<FilePath>();
-
             PopulateAssignedSizeData(newproduct);
-            PopulateCategoriesDropDownList(newproduct);
-            PopulateColorsDropDownList(newproduct);
+            
+            ViewBag.CategoryId = new SelectList(Retriever.GetCategories(), "CategoryId", "CategoryName", null);
+            ViewBag.ColorId = new SelectList(Retriever.GetColors(), "ColorId", "ColorName", null);
 
             return View(newproduct);
         }
@@ -120,8 +121,9 @@ namespace AdminPanel.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(Product newproduct, IEnumerable<HttpPostedFileBase> uploads, string[] selectedSizes)
         {
-            if (selectedSizes != null)
+            if (ModelState.IsValid)
             {
+                // assign sizes to product
                 newproduct.Sizes = new List<Size>();
 
                 foreach (string size in selectedSizes)
@@ -129,14 +131,15 @@ namespace AdminPanel.Areas.Admin.Controllers
                     Size sizeToAdd = db.Sizes.Find(int.Parse(size));
                     newproduct.Sizes.Add(sizeToAdd);
                 }
-            }
 
-            if (ModelState.IsValid)
-            {
+                // set product images list
                 newproduct.FilePaths = new List<FilePath>();
 
                 foreach (HttpPostedFileBase upload in uploads)
                 {
+                    // check each file upload
+                    // if any exists add this to product images list,
+                    // save on server
                     if (upload != null && upload.ContentLength > 0)
                     {
                         FilePath photo = new FilePath()
@@ -150,8 +153,7 @@ namespace AdminPanel.Areas.Admin.Controllers
                     }
                 }
 
-                newproduct.CreateDate = DateTime.Now;
-
+                // calculate product price
                 if (newproduct.Discount > 0)
                 {
                     newproduct.Price = newproduct.NormalPrice - newproduct.NormalPrice * ((decimal)newproduct.Discount / 100);
@@ -161,15 +163,18 @@ namespace AdminPanel.Areas.Admin.Controllers
                     newproduct.Price = newproduct.NormalPrice;
                 }
 
+                // set create date and save changes
+                newproduct.CreateDate = DateTime.Now;
                 db.Products.Add(newproduct);
                 await db.SaveChangesAsync();
+
+                // set confirmation message to Index() View
                 TempData["message"] = string.Format("{0} has been created.", newproduct.ProductName);
+
                 return RedirectToAction("Index");
             }
 
-            PopulateAssignedSizeData(newproduct);
-            PopulateCategoriesDropDownList();
-            PopulateColorsDropDownList();
+            // return if invalid
             return View(newproduct);
         }
 
@@ -186,11 +191,15 @@ namespace AdminPanel.Areas.Admin.Controllers
 
             Product product = db.Products.Include(p => p.Sizes).Include(p => p.FilePaths).Where(i => i.ProductId == id).Single();
 
+            // set selected checkbox for each product size
             PopulateAssignedSizeData(product);
 
             if (product == null)
-            { return HttpNotFound(); }
+            {
+                return HttpNotFound();
+            }
 
+            // set default view model values
             EditProductViewModel model = new EditProductViewModel()
             {
                 Id = product.ProductId,
@@ -203,8 +212,8 @@ namespace AdminPanel.Areas.Admin.Controllers
                 CategoryId = product.CategoryId,
                 ColorId = product.ColorId,
                 FilePaths = product.FilePaths.ToList(),
-                getCategories = PopulateCategories(product),
-                getColors = PopulateColors(product)
+                getCategories = new SelectList(Retriever.GetCategories(), "CategoryId", "CategoryName", product.Category.CategoryName),
+                getColors = new SelectList(Retriever.GetColors(), "ColorId", "ColorName", product.Color.ColorName)
             };
 
             return View(model);
@@ -224,78 +233,74 @@ namespace AdminPanel.Areas.Admin.Controllers
             Product prod = db.Products.Include(i => i.Sizes).Include(p => p.FilePaths).Where(p => p.ProductId == model.Id).Single();
             List<FilePath> actualImages = db.FilePaths.Where(p => p.ProductId == model.Id).ToList();
 
-            PopulateAssignedSizeData(prod);
-
-            model.FilePaths = prod.FilePaths.ToList();
-            model.getCategories = PopulateCategories(prod);
-            model.getColors = PopulateColors(prod);
-
             if (ModelState.IsValid)
             {
-                try
+                // check files upload
+                // if exists 
+                // delete old images and add new to product images list,
+                // save on server
+                if (uploads != null)
                 {
-                    if (uploads.Any(c => c != null))
+                    foreach (FilePath file in actualImages)
                     {
-                        foreach (FilePath file in actualImages)
-                        {
-                            string filePath = Request.MapPath("~/Content/Images/" + file.FileName);
-                            System.IO.File.Delete(filePath);
-                        }
+                        string filePath = Request.MapPath("~/Content/Images/" + file.FileName);
+                        System.IO.File.Delete(filePath);
+                    }
+                    db.FilePaths.RemoveRange(actualImages);
 
-                        db.FilePaths.RemoveRange(actualImages);
-                        prod.FilePaths = new List<FilePath>();
 
-                        foreach (HttpPostedFileBase upload in uploads)
+                    //prod.FilePaths = new List<FilePath>();
+
+                    foreach (HttpPostedFileBase upload in uploads)
+                    {
+                        if (upload != null && upload.ContentLength > 0)
                         {
-                            if (upload != null && upload.ContentLength > 0)
+                            FilePath photo = new FilePath
                             {
-                                FilePath photo = new FilePath
-                                {
-                                    FileName = Guid.NewGuid().ToString() + Path.GetExtension(upload.FileName),
-                                    FileType = FileType.Photo
-                                };
-                                prod.FilePaths.Add(photo);
-                                upload.SaveAs(Path.Combine(Server.MapPath("~/Content/Images"), photo.FileName));
-                            }
+                                FileName = Guid.NewGuid().ToString() + Path.GetExtension(upload.FileName),
+                                FileType = FileType.Photo
+                            };
+                            prod.FilePaths.Add(photo);
+                            upload.SaveAs(Path.Combine(Server.MapPath("~/Content/Images"), photo.FileName));
                         }
                     }
-
-                    //update sizes
-                    UpdateProductSizes(selectedSizes, prod);
-
-                    //count price
-                    if (prod.Discount > 0)
-                    {
-                        prod.Price = model.NormalPrice - model.NormalPrice * ((decimal)model.Discount / 100);
-                    }
-                    else
-                    {
-                        prod.Price = model.NormalPrice;
-                    }
-
-                    //attach model properties to product
-                    prod.ProductId = model.Id;
-                    prod.ProductName = model.ProductName;
-                    prod.Desc = model.Desc;
-                    prod.Material = model.Material;
-                    prod.NormalPrice = model.NormalPrice;
-                    prod.Discount = model.Discount;
-                    prod.CategoryId = model.CategoryId;
-                    prod.ColorId = model.ColorId;
-                    prod.EditDate = DateTime.Now;
-
-                    //save
-                    db.Entry(prod).State = EntityState.Modified;
-                    await db.SaveChangesAsync();
-
-                    TempData["message"] = string.Format("{0} has been edited", prod.ProductName);
-                    return RedirectToAction("Index");
                 }
-                catch (RetryLimitExceededException)
+
+                //update sizes
+                UpdateProductSizes(selectedSizes, prod);
+
+                // calculate product price
+                if (prod.Discount > 0)
                 {
-                    ModelState.AddModelError("", "Can not save content. Contact with administrator.");
+                    prod.Price = model.NormalPrice - model.NormalPrice * ((decimal)model.Discount / 100);
                 }
+                else
+                {
+                    prod.Price = model.NormalPrice;
+                }
+
+                //attach model properties as product properties
+                prod.ProductId = model.Id;
+                prod.ProductName = model.ProductName;
+                prod.Desc = model.Desc;
+                prod.Material = model.Material;
+                prod.NormalPrice = model.NormalPrice;
+                prod.Discount = model.Discount;
+                prod.CategoryId = model.CategoryId;
+                prod.ColorId = model.ColorId;
+                prod.EditDate = DateTime.Now;
+
+                //save changes
+                db.Entry(prod).State = EntityState.Modified;
+                await db.SaveChangesAsync();
+
+                // set confirmation message to Index() View
+                TempData["message"] = string.Format("{0} has been edited", prod.ProductName);
+
+                return RedirectToAction("Index");
             }
+
+            // return form if invalid
             return View(model);
         }
 
@@ -308,9 +313,6 @@ namespace AdminPanel.Areas.Admin.Controllers
         public async Task<ActionResult> Delete(int productID)
         {
             Product product = db.Products.Include(p => p.Sizes).Include(p => p.FilePaths).Where(p => p.ProductId == productID).Single();
-
-            TempData["message"] = string.Format("{0} has been deleted.", product.ProductName);
-
             List<FilePath> images = db.FilePaths.Where(s => s.ProductId == productID).ToList();
 
             foreach (FilePath image in images)
@@ -322,65 +324,41 @@ namespace AdminPanel.Areas.Admin.Controllers
             db.FilePaths.RemoveRange(images);
             db.Products.Remove(product);
             await db.SaveChangesAsync();
+
+            // set confirmation message to Index() View
+            TempData["message"] = string.Format("{0} has been deleted.", product.ProductName);
+
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// calculate product price on Create() or Edit() View
+        /// </summary>
+        /// <param name="total"> total price </param>
+        /// <param name="discount"> discount </param>
+        /// <returns> price with discount </returns>
         [HttpGet]
-        public ActionResult calcPrice(decimal fullPrice, decimal discount)
+        public ActionResult calcPrice(decimal total, decimal discount)
         {
             decimal afterDiscount;
 
             if (discount > 0)
             {
-                afterDiscount = fullPrice - fullPrice * (discount / 100);
+                afterDiscount = total - total * (discount / 100);
             }
             else
             {
-                afterDiscount = fullPrice;
+                afterDiscount = total;
             }
+
             return Json(afterDiscount, JsonRequestBehavior.AllowGet);
         }
-
-        //CRUD helper methods
-
-        private SelectList PopulateCategories(Product product)
-        {
-            IQueryable<Category> categoriesQuery = from p in db.Categories
-                                                   orderby p.CategoryName
-                                                   select p;
-
-            return new SelectList(categoriesQuery, "CategoryId", "CategoryName", product.Category.CategoryName);
-        }
-
-        private void PopulateCategoriesDropDownList(object selectedCategory = null)
-        {
-            IOrderedQueryable<Category> categoriesQuery = from c in db.Categories
-                                                          orderby c.CategoryName
-                                                          select c;
-
-            ViewBag.CategoryId = new SelectList(categoriesQuery, "CategoryId", "CategoryName", selectedCategory);
-        }
-
-        private void PopulateColorsDropDownList(object selectedColor = null)
-        {
-            IOrderedQueryable<Color> colorsQuery = from c in db.Colors
-                                                   orderby c.ColorName
-                                                   select c;
-
-            ViewBag.ColorId = new SelectList(colorsQuery, "ColorId", "ColorName", selectedColor);
-        }
-
-        private SelectList PopulateColors(Product product)
-        {
-            IQueryable<Color> colorsQuery = from p in db.Colors
-                                            orderby p.ColorName
-                                            select p;
-
-            return new SelectList(colorsQuery, "ColorId", "ColorName", product.Color.ColorName);
-        }
-
-
-
+        
+        /// <summary>
+        /// update product sizes
+        /// </summary>
+        /// <param name="selectedSizes"> list of sizes </param>
+        /// <param name="product"> product with updated sizes </param>
         private void UpdateProductSizes(string[] selectedSizes, Product product)
         {
 
@@ -412,6 +390,10 @@ namespace AdminPanel.Areas.Admin.Controllers
             }
         }
 
+        /// <summary>
+        /// mark product size checkboxes in view
+        /// </summary>
+        /// <param name="product"> specified product </param>
         private void PopulateAssignedSizeData(Product product)
         {
             DbSet<Size> allSizes = db.Sizes;
@@ -434,6 +416,18 @@ namespace AdminPanel.Areas.Admin.Controllers
                 }
                 ViewBag.Sizes = viewModel;
             }
+        }
+
+        /// <summary>
+        /// close database connections
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

@@ -51,10 +51,8 @@ namespace AdminPanel.Areas.Admin.Controllers
                 repository.Add(category);
                 return RedirectToAction("Index");
             }
-            else
-            {
-                return View(category);
-            }
+            
+            return View(category);
         }
         
         /// <summary>
@@ -98,6 +96,7 @@ namespace AdminPanel.Areas.Admin.Controllers
                 }
                 return RedirectToAction("Index");
             }
+            
             return View(category);
         }
 
@@ -111,6 +110,7 @@ namespace AdminPanel.Areas.Admin.Controllers
         {
             Category category = repository.GetCategories().FirstOrDefault(i => i.CategoryId == categoryId);
             repository.Delete(category);
+
             return RedirectToAction("Index");
         }
     }

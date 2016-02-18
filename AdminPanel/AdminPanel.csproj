@@ -187,6 +187,7 @@
     <Compile Include="Areas\Admin\Controllers\HomeController.cs" />
     <Compile Include="Areas\Admin\Controllers\SizeController.cs" />
     <Compile Include="Areas\Admin\Controllers\SuppliersController.cs" />
+    <Compile Include="Areas\Admin\Helpers\Retriever.cs" />
     <Compile Include="Areas\Admin\ViewModels\EditColorViewModel.cs" />
     <Compile Include="Areas\Admin\ViewModels\EditProductViewModel.cs" />
     <Compile Include="Areas\Admin\ViewModels\EditSupplierViewModel.cs" />
@@ -202,6 +203,10 @@
     <Compile Include="DataAccessLayer\AdminPanelMigrations\201602161920049_LessProperties.cs" />
     <Compile Include="DataAccessLayer\AdminPanelMigrations\201602161920049_LessProperties.Designer.cs">
       <DependentUpon>201602161920049_LessProperties.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DataAccessLayer\AdminPanelMigrations\201602172245375_NoForeignKeyFilePath.cs" />
+    <Compile Include="DataAccessLayer\AdminPanelMigrations\201602172245375_NoForeignKeyFilePath.Designer.cs">
+      <DependentUpon>201602172245375_NoForeignKeyFilePath.cs</DependentUpon>
     </Compile>
     <Compile Include="DataAccessLayer\AdminPanelMigrations\Configuration.cs" />
     <Compile Include="DataAccessLayer\CategoriesRepository.cs" />
@@ -315,8 +320,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Areas\Admin\Helpers\" />
-    <Folder Include="Areas\Admin\Views\Default\" />
     <Folder Include="Content\Images\Colors\" />
     <Folder Include="Content\Images\Suppliers\" />
   </ItemGroup>
@@ -334,6 +337,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DataAccessLayer\AdminPanelMigrations\201602161920049_LessProperties.resx">
       <DependentUpon>201602161920049_LessProperties.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataAccessLayer\AdminPanelMigrations\201602172245375_NoForeignKeyFilePath.resx">
+      <DependentUpon>201602172245375_NoForeignKeyFilePath.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DataAccessLayer\IdentityContextMigrations\201602161611051_init.resx">
       <DependentUpon>201602161611051_init.cs</DependentUpon>
