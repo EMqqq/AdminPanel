@@ -15,11 +15,11 @@
                 <legend>Add Delivery Method</legend>
                 <div class="form-group">
                     <div class="col-md-9 col-md-offset-2">
-                        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                        @Html.ValidationMessageFor(model => model.Name)
                     </div>
                     @Html.LabelFor(model => model.Name, new { @class = "requiredA control-label col-md-2" })
                     <div class="col-md-10">
-                        @Html.TextBoxFor(model => model.Name, new { @class = "form-control", @style = "text-align:center" })
+                        @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
                     </div>
                 </div>
                 <div class="col-md-offset-5 col-md-3">

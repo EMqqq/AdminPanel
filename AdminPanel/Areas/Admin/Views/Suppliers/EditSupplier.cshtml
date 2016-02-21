@@ -31,7 +31,7 @@
                 <legend>Edit Supplier</legend>
                 <div class="col-md-12 col-xs-12 supplierContent">
                     <div class="row col-md-offset-3">
-                        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                        @Html.ValidationMessageFor(model => model.Name)
                     </div>
                     <div class="row">
                         <div class="col-md-8 col-xs-10">
@@ -46,7 +46,7 @@
                         </div>
                     </div>
                     <div class="row col-md-offset-3">
-                        @Html.ValidationMessageFor(m => m.Price, "", new { @class = "text-danger" })
+                        @Html.ValidationMessageFor(m => m.Price)
                     </div>
                     <div class="row">
                         <div class="col-md-8 col-xs-10">
@@ -64,7 +64,7 @@
                     </div>
                     <div class="col-md-8 col-xs-10">
                         <div class="row col-md-offset-5">
-                            @Html.ValidationMessageFor(m => m.TransportTime, "", new { @class = "text-danger" })
+                            @Html.ValidationMessageFor(m => m.TransportTime)
                         </div>
                         <div class="row">
                             @Html.LabelFor(m => m.TransportTime, new { @class = "requiredA control-label col-md-3" })
@@ -75,7 +75,7 @@
                     </div>
                     <div class="col-md-8 col-xs-10">
                         <div class="row col-md-offset-5">
-                            @Html.ValidationMessageFor(m => m.DeliveryMethodId, "", new { @class = "text-danger" })
+                            @Html.ValidationMessageFor(m => m.DeliveryMethodId)
                         </div>
                         <div class="row">
                             @Html.LabelFor(m => m.DeliveryMethodId, new { @class = "requiredA col-md-3" })

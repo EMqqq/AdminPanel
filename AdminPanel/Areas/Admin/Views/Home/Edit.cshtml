@@ -9,7 +9,7 @@
     $(function () {
 
         // get typed price
-        var checkProduct = function () {
+        var checkProductPrice = function () {
             var productPrice = parseFloat(($('.price').val())).toFixed(2);
 
             // set product price as 0 if not typed
@@ -48,7 +48,7 @@
                 url: '@Url.Action("calcPrice", "Home")',
                 dataType: "json",
                 data: {
-                    "fullPrice": checkProduct(),
+                    "total": checkProductPrice(),
                     "discount": checkDiscount()
                 }
             }).done(function (result) {
@@ -100,7 +100,7 @@
                 <legend>Edit Product<span style="font-style:italic">@Model.ProductName</span></legend>
                 <div class="row">
                     <div class="col-md-offset-3 col-md-3">
-                        @Html.ValidationMessageFor(model => model.ProductName, "", new { @class = "text-danger" })
+                        @Html.ValidationMessageFor(model => model.ProductName)
                     </div>
                 </div>
                 <div class="form-group col-xs-12">
@@ -119,7 +119,7 @@
 
                 <div class="row">
                     <div class="col-md-offset-3 col-md-3">
-                        @Html.ValidationMessageFor(model => model.NormalPrice, "", new { @class = "text-danger" })
+                        @Html.ValidationMessageFor(model => model.NormalPrice)
                     </div>
                 </div>
                 <div class="form-group col-xs-12">
@@ -146,7 +146,7 @@
 
                 <div class="row">
                     <div class="col-md-offset-3 col-md-3">
-                        @Html.ValidationMessageFor(model => model.Material, "", new { @class = "text-danger" })
+                        @Html.ValidationMessageFor(model => model.Material)
                     </div>
                 </div>
                 <div class="form-group col-xs-12">
@@ -158,7 +158,7 @@
 
                 <div class="row">
                     <div class="col-md-offset-3 col-md-3">
-                        @Html.ValidationMessageFor(model => model.CategoryId, "", new { @class = "text-danger" })
+                        @Html.ValidationMessageFor(model => model.CategoryId)
                     </div>
                 </div>
                 <div class="form-group col-xs-12">
@@ -170,7 +170,7 @@
 
                 <div class="row">
                     <div class="col-md-offset-3 col-md-3">
-                        @Html.ValidationMessageFor(model => model.ColorId, "", new { @class = "text-danger" })
+                        @Html.ValidationMessageFor(model => model.ColorId)
                     </div>
                 </div>
                 <div class="form-group col-xs-12">

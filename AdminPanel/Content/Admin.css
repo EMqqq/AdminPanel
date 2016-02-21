@@ -211,6 +211,10 @@ fieldset[disabled] .btn-default.active {
     text-decoration: initial;
 }
 
+.field-validation-error {
+    color: #b94a48;
+}
+
 .nav-pills>li>a {
   color:black;
 }
