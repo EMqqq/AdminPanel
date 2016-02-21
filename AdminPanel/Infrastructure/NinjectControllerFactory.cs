@@ -33,9 +33,6 @@ namespace AdminPanel.Infrastructure
             ninjectKernel.Bind(typeof(ITRepository<AdminPanelContext, Category>)).To(typeof(TRepository<AdminPanelContext, Category>));
             ninjectKernel.Bind(typeof(ITRepository<AdminPanelContext, DeliveryMethod>)).To(typeof(TRepository<AdminPanelContext, DeliveryMethod>));
             ninjectKernel.Bind(typeof(ITRepository<AdminPanelContext, Size>)).To(typeof(TRepository<AdminPanelContext, Size>));
-            //ninjectKernel.Bind<ICategoriesRepository>().To<CategoriesRepository>();
-            //ninjectKernel.Bind<ISizesRepository>().To<SizesRepository>();
-            //ninjectKernel.Bind<IDeliveryMethodRepository>().To<DeliveryMethodRepository>();
         }
     }
 }
