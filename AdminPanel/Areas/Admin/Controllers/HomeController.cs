@@ -14,6 +14,7 @@ using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Threading.Tasks;
 using AdminPanel.Areas.Admin.Helpers;
+using AdminPanel.Abstract;
 
 namespace AdminPanel.Areas.Admin.Controllers
 {
@@ -99,11 +100,11 @@ namespace AdminPanel.Areas.Admin.Controllers
         public ActionResult Create()
         {
             Product newproduct = new Product();
-            
+
             // set every size default as product size in checkboxes
             newproduct.Sizes = new List<Size>();
             PopulateAssignedSizeData(newproduct);
-            
+
             ViewBag.CategoryId = new SelectList(Retriever.GetCategories(), "CategoryId", "CategoryName", null);
             ViewBag.ColorId = new SelectList(Retriever.GetColors(), "ColorId", "ColorName", null);
 
@@ -121,6 +122,10 @@ namespace AdminPanel.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(Product newproduct, IEnumerable<HttpPostedFileBase> uploads, string[] selectedSizes)
         {
+            // remake if something went wrong
+            ViewBag.CategoryId = new SelectList(Retriever.GetCategories(), "CategoryId", "CategoryName", null);
+            ViewBag.ColorId = new SelectList(Retriever.GetColors(), "ColorId", "ColorName", null);
+
             if (ModelState.IsValid)
             {
                 // assign sizes to product
@@ -353,7 +358,7 @@ namespace AdminPanel.Areas.Admin.Controllers
 
             return Json(afterDiscount, JsonRequestBehavior.AllowGet);
         }
-        
+
         /// <summary>
         /// update product sizes
         /// </summary>

@@ -12,12 +12,21 @@ using System.Threading.Tasks;
 using System.Net;
 using System;
 using AdminPanel.Areas.Admin.Helpers;
+using AdminPanel.Abstract;
 
 namespace AdminPanel.Areas.Admin.Controllers
 {
     public class SuppliersController : AdminController
     {
-        AdminPanelContext db = new AdminPanelContext();
+        private ITRepository<AdminPanelContext, Supplier> repository;
+        private ITRepository<AdminPanelContext, FilePath> repoFilePath;
+
+        public SuppliersController(ITRepository<AdminPanelContext, Supplier> repository,
+                                ITRepository<AdminPanelContext, FilePath> repoFilePath)
+        {
+            this.repository = repository;
+            this.repoFilePath = repoFilePath;
+        }
 
         /// <summary>
         /// GET: Admin/Suppliers
@@ -25,7 +34,7 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns> display suppliers from database </returns>
         public ActionResult Index()
         {
-            List<Supplier> suppliers = db.Suppliers.Include(d => d.DeliveryMethod).Include(f => f.FilePath).OrderBy(c => c.Name).ToList();
+            List<Supplier> suppliers = repository.GetAll.OrderBy(c => c.Name).ToList();
             return View(suppliers);
         }
 
@@ -39,7 +48,7 @@ namespace AdminPanel.Areas.Admin.Controllers
             Supplier supplier = new Supplier();
 
             // get delivery methods SelectList for supplier
-            ViewBag.DeliveryMethodID = new SelectList(Retriever.GetDeliveryMethods(), "DeliveryMethodId", "Name", supplier);
+            ViewBag.DeliveryMethodID = new SelectList(Retriever.GetDeliveryMethods(), "DeliveryMethodId", "Name", null);
 
             return View(supplier);
         }
@@ -52,8 +61,10 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns> add supplier or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> AddSupplier(Supplier supplier, HttpPostedFileBase upload)
+        public ActionResult AddSupplier(Supplier supplier, HttpPostedFileBase upload)
         {
+            ViewBag.DeliveryMethodID = new SelectList(Retriever.GetDeliveryMethods(), "DeliveryMethodId", "Name", null);
+
             if (upload == null)
             {
                 ModelState.AddModelError("NoImage", "Upload supplier's image");
@@ -76,9 +87,9 @@ namespace AdminPanel.Areas.Admin.Controllers
                 upload.SaveAs(Path.Combine(Server.MapPath("~/Content/Images/Suppliers"), image.FileName));
 
                 // save changes
-                db.Suppliers.Add(supplier);
+                repository.Add(supplier);
                 image.Suppliers.Add(supplier);
-                await db.SaveChangesAsync();
+                repository.Save();
 
                 return RedirectToAction("Index");
             }
@@ -93,14 +104,9 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <param name="id"> supplier's id </param>
         /// <returns> supplier's edit form </returns>
         [HttpGet]
-        public ActionResult EditSupplier(int? id)
+        public ActionResult EditSupplier(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-
-            Supplier supplier = db.Suppliers.Include(f => f.FilePath).FirstOrDefault(s => s.SupplierId == id);
+            Supplier supplier = repository.Get(id);
 
             if (supplier == null)
             {
@@ -132,10 +138,10 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns> save supplier changes or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EditSupplier(EditSupplierViewModel model, HttpPostedFileBase upload)
+        public ActionResult EditSupplier(EditSupplierViewModel model, HttpPostedFileBase upload)
         {
-            Supplier supplier = await db.Suppliers.Include(f => f.FilePath).FirstOrDefaultAsync(s => s.SupplierId == model.Id);
-            FilePath actualImage = db.FilePaths.Where(c => c.FilePathId == supplier.FilePathId).FirstOrDefault();
+            Supplier supplier = repository.Get(model.Id);
+            FilePath actualImage = repoFilePath.GetAll.Where(c => c.FilePathId == supplier.FilePathId).FirstOrDefault();
             
             // get a path to image on server
             string actualImagePath = Request.MapPath("~/Content/Images/Suppliers/" + actualImage.FileName);
@@ -170,8 +176,7 @@ namespace AdminPanel.Areas.Admin.Controllers
                 supplier.TransportTime = model.TransportTime;
 
                 // save changes
-                db.Entry(supplier).State = EntityState.Modified;
-                await db.SaveChangesAsync();
+                repository.Update(supplier);
                 return RedirectToAction("Index");
             }
 
@@ -185,34 +190,20 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <param name="id"> supplier's id </param>
         /// <returns> GET: Admin/Supplier </returns>
         [HttpPost]
-        public async Task<ActionResult> DeleteSupplier(int id)
+        public ActionResult DeleteSupplier(int id)
         {
-            Supplier supplier = await db.Suppliers.Where(s => s.SupplierId == id).FirstOrDefaultAsync();
-            FilePath image = await db.FilePaths.Where(f => f.FilePathId == supplier.FilePathId).FirstOrDefaultAsync();
+            Supplier supplier = repository.Get(id);
+            FilePath image = repoFilePath.GetAll.Where(f => f.FilePathId == supplier.FilePathId).FirstOrDefault();
 
             // get path to image and delete
             string filePath = Request.MapPath("~/Content/Images/Suppliers/" + image.FileName);
             System.IO.File.Delete(filePath);
-            db.FilePaths.Remove(image);
+            repoFilePath.Delete(image);
 
             // delete supplier
-            db.Suppliers.Remove(supplier);
-
-            await db.SaveChangesAsync();
+            repository.Delete(supplier);
 
             return RedirectToAction("Index");
-        }
-
-        /// <summary>
-        /// close database connections
-        /// </summary>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }

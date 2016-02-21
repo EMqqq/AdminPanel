@@ -167,7 +167,7 @@
                 <div class="form-group col-xs-12">
                     @Html.LabelFor(model => model.CategoryId, new { @class = "requiredA col-md-offset-1 control-label col-md-2" })
                     <div class="col-md-3">
-                        @Html.DropDownList("CategoryId", String.Empty)
+                        @Html.DropDownList("CategoryId", (IEnumerable<SelectListItem>)ViewBag.DeliveryMethodID, String.Empty)
                     </div>
                 </div>
 
@@ -179,7 +179,7 @@
                 <div class="form-group col-xs-12">
                     @Html.LabelFor(model => model.ColorId, new { @class = "requiredA col-md-offset-1 control-label col-md-2" })
                     <div class="col-md-3">
-                        @Html.DropDownList("ColorId", String.Empty)
+                        @Html.DropDownList("ColorId", (IEnumerable<SelectListItem>)ViewBag.DeliveryMethodID, String.Empty)
                     </div>
                 </div>
 

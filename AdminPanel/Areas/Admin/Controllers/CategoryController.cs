@@ -10,9 +10,9 @@ namespace AdminPanel.Areas.Admin.Controllers
 {
     public class CategoryController : AdminController
     {
-        private ICategoriesRepository repository;
+        private ITRepository<AdminPanelContext, Category> repository;
 
-        public CategoryController(ICategoriesRepository repository)
+        public CategoryController(ITRepository<AdminPanelContext, Category> repository)
         {
             this.repository = repository;
         }
@@ -23,7 +23,7 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns> display categories from database </returns>
         public ActionResult Index()
         {
-            return View(repository.GetCategories().OrderBy(c => c.CategoryName));
+            return View(repository.GetAll.OrderBy(c => c.CategoryName));
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns> add category or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AddCategory([Bind(Include = "CategoryId, CategoryName")] Category category)
+        public ActionResult AddCategory(Category category)
         {
             if (ModelState.IsValid)
             {
@@ -61,14 +61,9 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <param name="id"> category's id </param>
         /// <returns> category's edit form </returns>
         [HttpGet]
-        public ActionResult EditCategory(int? id)
+        public ActionResult EditCategory(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-
-            Category category = repository.GetCategories().Where(c => c.CategoryId == id).FirstOrDefault();
+            Category category = repository.Get(id);
 
             if (category == null)
             {
@@ -85,15 +80,11 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns> save changes or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditCategory([Bind(Include = "CategoryId, CategoryName")] Category category)
+        public ActionResult EditCategory(Category category)
         {
             if (ModelState.IsValid)
             {
-                using (AdminPanelContext db = new AdminPanelContext())
-                {
-                    db.Entry(category).State = EntityState.Modified;
-                    db.SaveChanges();
-                }
+                repository.Update(category);
                 return RedirectToAction("Index");
             }
             
@@ -108,7 +99,7 @@ namespace AdminPanel.Areas.Admin.Controllers
         [HttpPost]
         public ActionResult DeleteCategory(int categoryId)
         {
-            Category category = repository.GetCategories().FirstOrDefault(i => i.CategoryId == categoryId);
+            Category category = repository.Get(categoryId);
             repository.Delete(category);
 
             return RedirectToAction("Index");

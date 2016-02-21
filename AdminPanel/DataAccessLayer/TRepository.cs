@@ -6,17 +6,17 @@ using System.Linq;
 
 namespace AdminPanel.DataAccessLayer
 {
-    public class TRepository<TObject> : ITRepository<TObject> where TObject : class
+    public class TRepository<C, TObject> : ITRepository<C, TObject> where TObject : class where C : DbContext
     {
-        protected AdminPanelContext _context;
+        protected C _context;
         private IDbSet<TObject> _entities;
 
-        public TRepository(AdminPanelContext context)
+        public TRepository(C context)
         {
             _context = context;
         }
 
-        private IDbSet<TObject> Entities
+        protected IDbSet<TObject> Entities
         {
             get
             {
@@ -33,52 +33,37 @@ namespace AdminPanel.DataAccessLayer
             return Entities.Find(id);
         }
 
-        public virtual IQueryable<TObject> GetAll
+        public IQueryable<TObject> GetAll
         {
             get { return Entities; }
         }
 
-        public void Add(TObject t)
+        public virtual void Add(TObject t)
         {
             Entities.Add(t);
-            _context.SaveChanges();
+            Save();
         }
 
         public void Update(TObject entity)
         {
-            try
-            {
-                if (entity == null)
-                {
-                    throw new ArgumentNullException("entity");
-                }
-                _context.SaveChanges();
-            }
-            catch (DbEntityValidationException dbEx)
-            {
-                var msg = string.Empty;
-                foreach (var validationErrors in dbEx.EntityValidationErrors)
-                {
-                    foreach (var validationError in validationErrors.ValidationErrors)
-                    {
-                        msg += Environment.NewLine + string.Format("Property: {0} Error: {1}",
-                        validationError.PropertyName, validationError.ErrorMessage);
-                    }
-                }
-                var fail = new Exception(msg, dbEx);
-                throw fail;
-            }
+            _context.Entry(entity).State = EntityState.Modified;
+            Save();
         }
 
-        public void Delete(TObject t)
+        public virtual void Delete(TObject t)
         {
             Entities.Remove(t);
-            _context.SaveChanges();
+            Save();
         }
 
         public int Count()
         {
             return Entities.Count();
+        }
+
+        public void Save()
+        {
+            _context.SaveChanges();
         }
     }
 }

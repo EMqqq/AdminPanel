@@ -71,7 +71,7 @@
                     <div class="row col-md-12">
                         @Html.LabelFor(m => m.DeliveryMethodId, new { @class = "requiredA col-md-2" })
                         <div class="col-md-4">
-                            @Html.DropDownList("DeliveryMethodID", String.Empty)
+                            @Html.DropDownList("DeliveryMethodId", (IEnumerable<SelectListItem>)ViewBag.DeliveryMethodID, String.Empty)
                         </div>
                     </div>
                 </div>

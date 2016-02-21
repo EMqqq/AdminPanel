@@ -4,6 +4,8 @@ using System.Web.Routing;
 using Ninject;
 using AdminPanel.Abstract;
 using AdminPanel.DataAccessLayer;
+using System.Data.Entity;
+using AdminPanel.Entities;
 
 namespace AdminPanel.Infrastructure
 {
@@ -24,10 +26,16 @@ namespace AdminPanel.Infrastructure
 
         private void AddBindings()
         {
-            ninjectKernel.Bind(typeof(ITRepository<>)).To(typeof(TRepository<>));
-            ninjectKernel.Bind<ICategoriesRepository>().To<CategoriesRepository>();
-            ninjectKernel.Bind<ISizesRepository>().To<SizesRepository>();
-            ninjectKernel.Bind<IDeliveryMethodRepository>().To<DeliveryMethodRepository>();
+            ninjectKernel.Bind(typeof(ITRepository<AdminPanelContext, Color>)).To(typeof(ColorRepository));
+            ninjectKernel.Bind(typeof(ITRepository<AdminPanelContext, FilePath>)).To(typeof(FilePathRepository));
+            ninjectKernel.Bind(typeof(ITRepository<AdminPanelContext, Supplier>)).To(typeof(SupplierRepository));
+
+            ninjectKernel.Bind(typeof(ITRepository<AdminPanelContext, Category>)).To(typeof(TRepository<AdminPanelContext, Category>));
+            ninjectKernel.Bind(typeof(ITRepository<AdminPanelContext, DeliveryMethod>)).To(typeof(TRepository<AdminPanelContext, DeliveryMethod>));
+            ninjectKernel.Bind(typeof(ITRepository<AdminPanelContext, Size>)).To(typeof(TRepository<AdminPanelContext, Size>));
+            //ninjectKernel.Bind<ICategoriesRepository>().To<CategoriesRepository>();
+            //ninjectKernel.Bind<ISizesRepository>().To<SizesRepository>();
+            //ninjectKernel.Bind<IDeliveryMethodRepository>().To<DeliveryMethodRepository>();
         }
     }
 }

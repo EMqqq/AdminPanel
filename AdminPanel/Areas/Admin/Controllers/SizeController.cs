@@ -2,14 +2,15 @@
 using System.Web.Mvc;
 using AdminPanel.Abstract;
 using AdminPanel.Entities;
+using AdminPanel.DataAccessLayer;
 
 namespace AdminPanel.Areas.Admin.Controllers
 {
     public class SizeController : AdminController
     {
-        private ISizesRepository repository;
+        private ITRepository<AdminPanelContext, Size> repository;
 
-        public SizeController(ISizesRepository repository)
+        public SizeController(ITRepository<AdminPanelContext, Size> repository)
         { this.repository = repository; }
 
         /// <summary>
@@ -18,7 +19,7 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns>  display sizes from database  </returns>
         public ActionResult Index()
         {
-            return View(repository.GetSizes().OrderBy(s => s.SizeId));
+            return View(repository.GetAll.OrderBy(s => s.SizeId));
         }
 
         /// <summary>
@@ -29,7 +30,6 @@ namespace AdminPanel.Areas.Admin.Controllers
         public ActionResult AddSize()
         {
             Size size = new Size();
-
             return View(size);
         }
 
@@ -59,7 +59,7 @@ namespace AdminPanel.Areas.Admin.Controllers
         [HttpPost]
         public ActionResult DeleteSize(int sizeId)
         {
-            Size size = repository.GetSizes().FirstOrDefault(i => i.SizeId == sizeId);
+            Size size = repository.Get(sizeId);
             repository.Delete(size);
 
             return RedirectToAction("Index");

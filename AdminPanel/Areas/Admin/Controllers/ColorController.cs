@@ -11,12 +11,21 @@ using System.Web.Mvc;
 using System.Threading.Tasks;
 using AdminPanel.Areas.Admin.ViewModels;
 using System;
+using AdminPanel.Abstract;
 
 namespace AdminPanel.Areas.Admin.Controllers
 {
     public class ColorController : AdminController
     {
-        AdminPanelContext db = new AdminPanelContext();
+        private ITRepository<AdminPanelContext, Color> repository;
+        private ITRepository<AdminPanelContext, FilePath> repoFilePath;
+
+        public ColorController(ITRepository<AdminPanelContext, Color> repository,
+                                ITRepository<AdminPanelContext, FilePath> repoFilePath)
+        {
+            this.repository = repository;
+            this.repoFilePath = repoFilePath;
+        }
 
         /// <summary>
         /// GET: Admin/Color
@@ -24,7 +33,7 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns> display colors from database </returns>
         public ActionResult Index()
         {
-            List<Color> Colors = db.Colors.Include(f => f.FilePath).OrderBy(c => c.ColorName).ToList();
+            List<Color> Colors = repository.GetAll.OrderBy(c => c.ColorName).ToList();
             return View(Colors);
         }
 
@@ -47,7 +56,7 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns> add color or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> AddColor(Color color, HttpPostedFileBase upload)
+        public ActionResult AddColor(Color color, HttpPostedFileBase upload)
         {
             if (upload == null)
             {
@@ -71,9 +80,9 @@ namespace AdminPanel.Areas.Admin.Controllers
                 upload.SaveAs(Path.Combine(Server.MapPath("~/Content/Images/Colors"), colorImage.FileName));
 
                 // save changes
-                db.Colors.Add(color);
+                repository.Add(color);
                 colorImage.Colors.Add(color);
-                await db.SaveChangesAsync();
+                repository.Save();
 
                 return RedirectToAction("Index");
             }
@@ -88,14 +97,9 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <param name="id"> color's id </param>
         /// <returns> color's edit form </returns>
         [HttpGet]
-        public ActionResult EditColor(int? id)
+        public ActionResult EditColor(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-
-            Color color = db.Colors.Where(c => c.ColorId == id).FirstOrDefault();
+            Color color = repository.Get(id);
 
             if (color == null)
             {
@@ -121,10 +125,10 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns> save color changes or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EditColor(EditColorViewModel model, HttpPostedFileBase upload)
+        public ActionResult EditColor(EditColorViewModel model, HttpPostedFileBase upload)
         {
-            Color color = await db.Colors.Where(c => c.ColorId == model.Id).FirstOrDefaultAsync();
-            FilePath actualImage = db.FilePaths.Where(c => c.FilePathId == color.FilePathId).FirstOrDefault();
+            Color color = repository.Get(model.Id);
+            FilePath actualImage = repoFilePath.GetAll.Where(c => c.FilePathId == color.FilePathId).FirstOrDefault();
             
             // assign name from model
             color.ColorName = model.Name;
@@ -154,10 +158,8 @@ namespace AdminPanel.Areas.Admin.Controllers
                     
                     upload.SaveAs(Path.Combine(Server.MapPath("~/Content/Images/Colors"), colorImage.FileName));
                 }
-
-                // save changes
-                db.Entry(color).State = EntityState.Modified;
-                await db.SaveChangesAsync();
+                
+                repository.Update(color);
 
                 return RedirectToAction("Index");
             }
@@ -172,34 +174,20 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <param name="colorId"> color's id </param>
         /// <returns> GET: Admin/Color </returns>
         [HttpPost]
-        public async Task<ActionResult> DeleteColor(int colorId)
+        public ActionResult DeleteColor(int colorId)
         {
-            Color color = await db.Colors.Where(c => c.ColorId == colorId).SingleAsync();
-            FilePath image = await db.FilePaths.Where(c => c.FilePathId == color.FilePathId).SingleAsync();
+            Color color = repository.Get(colorId);
+            FilePath image = repoFilePath.GetAll.Where(c => c.FilePathId == color.FilePathId).Single();
 
             // get path to image and delete
             string filePath = Request.MapPath("~/Content/Images/Colors/" + image.FileName);
             System.IO.File.Delete(filePath);
-            db.FilePaths.Remove(image);
+            repoFilePath.Delete(image);
 
             // delete color
-            db.Colors.Remove(color);
-
-            await db.SaveChangesAsync();
+            repository.Delete(color);
 
             return RedirectToAction("Index");
-        }
-
-        /// <summary>
-        /// close database connections
-        /// </summary>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }

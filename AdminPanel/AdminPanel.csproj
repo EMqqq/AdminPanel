@@ -170,9 +170,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Abstract\ICategoriesRepository.cs" />
-    <Compile Include="Abstract\IDeliveryMethodRepository.cs" />
-    <Compile Include="Abstract\ISizesRepository.cs" />
     <Compile Include="Abstract\ITRepository.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
@@ -209,15 +206,15 @@
       <DependentUpon>201602172245375_NoForeignKeyFilePath.cs</DependentUpon>
     </Compile>
     <Compile Include="DataAccessLayer\AdminPanelMigrations\Configuration.cs" />
-    <Compile Include="DataAccessLayer\CategoriesRepository.cs" />
-    <Compile Include="DataAccessLayer\DeliveryMethodRepository.cs" />
+    <Compile Include="DataAccessLayer\ColorRepository.cs" />
+    <Compile Include="DataAccessLayer\FilePathRepository.cs" />
     <Compile Include="DataAccessLayer\IdentityContext.cs" />
     <Compile Include="DataAccessLayer\IdentityContextMigrations\201602161611051_init.cs" />
     <Compile Include="DataAccessLayer\IdentityContextMigrations\201602161611051_init.Designer.cs">
       <DependentUpon>201602161611051_init.cs</DependentUpon>
     </Compile>
     <Compile Include="DataAccessLayer\IdentityContextMigrations\Configuration.cs" />
-    <Compile Include="DataAccessLayer\SizesRepository.cs" />
+    <Compile Include="DataAccessLayer\SupplierRepository.cs" />
     <Compile Include="DataAccessLayer\TRepository.cs" />
     <Compile Include="Entities\Category.cs" />
     <Compile Include="Entities\Color.cs" />

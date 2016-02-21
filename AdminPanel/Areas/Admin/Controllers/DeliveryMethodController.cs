@@ -11,9 +11,9 @@ namespace AdminPanel.Areas.Admin.Controllers
 {
     public class DeliveryMethodController : AdminController
     {
-        private IDeliveryMethodRepository repository;
+        private ITRepository<AdminPanelContext, DeliveryMethod> repository;
 
-        public DeliveryMethodController(IDeliveryMethodRepository repository)
+        public DeliveryMethodController(ITRepository<AdminPanelContext, DeliveryMethod> repository)
         { this.repository = repository; }
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns> display delivery methods from database </returns>
         public ActionResult Index()
         {
-            return View(repository.GetDeliveryMethods().OrderBy(c => c.Name));
+            return View(repository.GetAll.OrderBy(c => c.Name));
         }
 
         /// <summary>
@@ -33,7 +33,6 @@ namespace AdminPanel.Areas.Admin.Controllers
         public ActionResult AddDeliveryMethod()
         {
             DeliveryMethod deliveryMethod = new DeliveryMethod();
-
             return View(deliveryMethod);
         }
 
@@ -44,7 +43,7 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns> add category or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AddDeliveryMethod([Bind(Include = "DeliveryMethodId, Name")] DeliveryMethod deliveryMethod)
+        public ActionResult AddDeliveryMethod(DeliveryMethod deliveryMethod)
         {
             if (ModelState.IsValid)
             {
@@ -61,14 +60,9 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <param name="id"> delivery method's id </param>
         /// <returns> delivery method's edit form </returns>
         [HttpGet]
-        public ActionResult EditDeliveryMethod(int? id)
+        public ActionResult EditDeliveryMethod(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-
-            DeliveryMethod deliveryMethod = repository.GetDeliveryMethods().Where(c => c.DeliveryMethodId == id).FirstOrDefault();
+            DeliveryMethod deliveryMethod = repository.Get(id);
 
             if (deliveryMethod == null)
             {
@@ -85,16 +79,11 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <returns> save changes or display errors </returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EditDeliveryMethod([Bind(Include = "DeliveryMethodId, Name")] DeliveryMethod deliveryMethod)
+        public ActionResult EditDeliveryMethod([Bind(Include = "DeliveryMethodId, Name")] DeliveryMethod deliveryMethod)
         {
             if (ModelState.IsValid)
             {
-                using (AdminPanelContext db = new AdminPanelContext())
-                {
-                    db.Entry(deliveryMethod).State = EntityState.Modified;
-                    await db.SaveChangesAsync();
-                }
-
+                repository.Update(deliveryMethod);
                 return RedirectToAction("Index");
             }
             
@@ -109,8 +98,9 @@ namespace AdminPanel.Areas.Admin.Controllers
         [HttpPost]
         public ActionResult DeleteDeliveryMethod(int deliveryMethodId)
         {
-            DeliveryMethod deliveryMethod = repository.GetDeliveryMethods().FirstOrDefault(i => i.DeliveryMethodId == deliveryMethodId);
+            DeliveryMethod deliveryMethod = repository.Get(deliveryMethodId);
             repository.Delete(deliveryMethod);
+
             return RedirectToAction("Index");
         }
     }
