@@ -366,7 +366,6 @@ namespace AdminPanel.Areas.Admin.Controllers
         /// <param name="product"> product with updated sizes </param>
         private void UpdateProductSizes(string[] selectedSizes, Product product)
         {
-
             if (selectedSizes == null)
             {
                 product.Sizes = new List<Size>();
@@ -407,7 +406,7 @@ namespace AdminPanel.Areas.Admin.Controllers
 
             if (productSizes == null)
             {
-                ModelState.AddModelError("NoSelectedSize", "Wybierz rozmiar produktu.");
+                ModelState.AddModelError("NoSelectedSize", "Select product's size.");
             }
             else
             {
